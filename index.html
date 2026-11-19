@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PYTHON GUI LAB — Текстові поля</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-header">
+        <div class="logo">
+            <span class="logo-icon">🐍</span>
+            <div>
+                <h1>PYTHON GUI LAB</h1>
+                <p>Текстові поля: введи, отримай, створи!</p>
+            </div>
+        </div>
+        <div class="user-status" id="headerUserStatus" style="display:none;">
+            Учень: <strong id="displayStudentName"></strong> | 
+            Прогрес: <span id="progressPercentage">0%</span>
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <aside class="sidebar">
+            <ul class="nav-links">
+                <li class="active" onclick="switchSection('welcome')">🏠 Головна</li>
+                <li onclick="switchSection('theory')">📚 Лабораторія теорії</li>
+                <li onclick="switchSection('trainer')">🏋️ Інтерактивний тренажер</li>
+                <li onclick="switchSection('workshop')">🛠️ Практична майстерня</li>
+                <li onclick="switchSection('quiz')">📝 Перевір себе</li>
+                <li onclick="switchSection('report')">📊 Підсумковий звіт</li>
+            </ul>
+
+            <div class="assistant-card">
+                <div class="bot-avatar">🤖</div>
+                <div class="assistant-info">
+                    <strong>Robo-Py</strong>
+                    <p id="assistantText">Привіт! Я твій робот-помічник. Готовий опанувати Entry в Tkinter?</p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <!-- SECTION: WELCOME -->
+            <section id="sec-welcome" class="section active">
+                <div class="welcome-hero">
+                    <div>
+                        <h2>Вітаємо в Digital Lab! 🚀</h2>
+                        <p>Стань справжнім розробником графічних програм у Python. Навчися створювати текстові поля, зчитувати з них дані та керувати кнопками й написами!</p>
+                        
+                        <div class="user-input-group">
+                            <label for="studentNameInput">Введи своє ім'я для початку навчання:</label>
+                            <input type="text" id="studentNameInput" placeholder="Наприклад, Олена чи Макс" autocomplete="off">
+                            <button class="btn btn-primary" onclick="startLearning()">Розпочати пригоду 🔥</button>
+                        </div>
+                    </div>
+                    <div style="text-align: center; font-size: 8rem; line-height: 1;">
+                        💻📱
+                    </div>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3>📚 Теорія</h3>
+                        <p>Дізнайся все про віджети Entry, Label, Button та їх методи get(), delete(), insert().</p>
+                    </div>
+                    <div class="card">
+                        <h3>🏋️ Тренажер</h3>
+                        <p>5 інтерактивних вправ на відповідність, пошук помилок та доповнення коду.</p>
+                    </div>
+                    <div class="card">
+                        <h3>🛠️ Майстерня</h3>
+                        <p>Створи 3 власні програми з симуляцією виконання у графічному вікні.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: THEORY -->
+            <section id="sec-theory" class="section">
+                <h2>📚 Теоретична лабораторія</h2>
+                <p>Опрацюй матеріали нижче, щоб навчитися створювати зручні текстові інтерфейси.</p>
+
+                <div id="theoryContainer"></div>
+            </section>
+
+            <!-- SECTION: TRAINER -->
+            <section id="sec-trainer" class="section">
+                <h2>🏋️ Інтерактивний тренажер</h2>
+                <p>Виконай 5 завдань для закріплення базових команд.</p>
+
+                <!-- Task 1 -->
+                <div class="card interactive-box">
+                    <h3>Завдання 1. Знайди правильну команду</h3>
+                    <p>Встанови відповідність між командами Tkinter та їх призначенням:</p>
+                    <div id="matchTaskContainer"></div>
+                    <button class="btn btn-secondary" onclick="checkMatchTask()">Перевірити відповідність</button>
+                    <div id="matchFeedback" class="feedback"></div>
+                </div>
+
+                <!-- Task 2 -->
+                <div class="card interactive-box">
+                    <h3>Завдання 2. Доповни код</h3>
+                    <p>Якої команди не вистачає для створення текстового поля?</p>
+                    <div class="code-block">
+from tkinter import *
+root = Tk()
+entry = <select id="task2Select" class="code-select">
+    <option value="">-- обери команду --</option>
+    <option value="Label">Label(root)</option>
+    <option value="Entry">Entry(root)</option>
+    <option value="Button">Button(root)</option>
+</select>
+entry.pack()
+root.mainloop()</div>
+                    <button class="btn btn-secondary" onclick="checkTask2()">Перевірити</button>
+                    <div id="task2Feedback" class="feedback"></div>
+                </div>
+
+                <!-- Task 3 -->
+                <div class="card interactive-box">
+                    <h3>Завдання 3. Що виведе програма?</h3>
+                    <p>Проаналізуй послідовність дій:</p>
+                    <div class="code-block">
+entry.insert(0, "Python")
+entry.delete(0, 2)
+result = entry.get()</div>
+                    <p>Що поверне команда <code>entry.get()</code>?</p>
+                    <input type="text" id="task3Input" placeholder="Введи результат...">
+                    <button class="btn btn-secondary" onclick="checkTask3()">Перевірити</button>
+                    <div id="task3Feedback" class="feedback"></div>
+                </div>
+
+                <!-- Task 4 -->
+                <div class="card interactive-box">
+                    <h3>Завдання 4. Знайди помилку</h3>
+                    <p>Розробник вирішив зчитати текст із поля `entry`, але виникла помилка:</p>
+                    <div class="code-block">text = entry.read()  # Error!</div>
+                    <p>Яка команда є правильною для отримання тексту з Entry?</p>
+                    <div>
+                        <label><input type="radio" name="task4" value="fetch"> entry.fetch()</label><br>
+                        <label><input type="radio" name="task4" value="get"> entry.get()</label><br>
+                        <label><input type="radio" name="task4" value="text"> entry.text()</label>
+                    </div>
+                    <button class="btn btn-secondary" onclick="checkTask4()" style="margin-top:10px;">Перевірити</button>
+                    <div id="task4Feedback" class="feedback"></div>
+                </div>
+
+                <!-- Task 5 -->
+                <div class="card interactive-box">
+                    <h3>Завдання 5. Елементи інтерфейсу</h3>
+                    <p>Яка команда відповідає за створення натискальної кнопки в Tkinter?</p>
+                    <select id="task5Select" style="padding: 8px; border-radius: 8px;">
+                        <option value="">-- Вибери віджет --</option>
+                        <option value="Entry">Entry()</option>
+                        <option value="Button">Button()</option>
+                        <option value="Label">Label()</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="checkTask5()">Перевірити</button>
+                    <div id="task5Feedback" class="feedback"></div>
+                </div>
+            </section>
+
+            <!-- SECTION: WORKSHOP -->
+            <section id="sec-workshop" class="section">
+                <h2>🛠️ Практична майстерня</h2>
+                <p>Напиши код Python Tkinter та протестуй його роботу у віртуальному вікні!</p>
+
+                <div class="workshop-task active">
+                    <h3>Рівень 1. Початковий: «Привітання»</h3>
+                    <p>Створи вікно з написом, текстовим полем Entry та кнопкою «Привітати», яка зчитує ім'я через <code>get()</code>.</p>
+                    <div class="editor-container">
+                        <textarea id="codeLevel1" class="code-editor" spellcheck="false">from tkinter import *
+
+root = Tk()
+root.title("Привітання")
+root.geometry("300x200")
+
+label = Label(root, text="Введи своє ім'я:")
+label.pack()
+
+entry = Entry(root)
+entry.pack()
+
+def greet():
+    name = entry.get()
+    lbl_res.config(text="Привіт, " + name + "!")
+
+btn = Button(root, text="Привітати", command=greet)
+btn.pack()
+
+lbl_res = Label(root, text="")
+lbl_res.pack()
+
+root.mainloop()</textarea>
+                        <div class="gui-preview">
+                            <div class="gui-window-title">Привітання (Tkinter Simulation)</div>
+                            <div class="gui-window-body">
+                                <label style="display:block; margin-bottom: 5px;">Введи своє ім'я:</label>
+                                <input type="text" id="sim1Entry" placeholder="Ім'я..." style="padding:5px; width:80%; margin-bottom:10px;"><br>
+                                <button class="btn btn-primary" onclick="runSim1()">Привітати</button>
+                                <div id="sim1Output" style="margin-top:15px; font-weight:bold; color:var(--primary);"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="verifyCode(1)">Перевірити код 🚀</button>
+                    <div id="workFeedback1" class="feedback"></div>
+                </div>
+
+                <div class="workshop-task" style="margin-top: 30px;">
+                    <h3>Рівень 2. Середній: «Мініанкета»</h3>
+                    <p>Створи 2 текстових поля (Ім'я та Прізвище), кнопку «Показати» та кнопку «Очистити» (використовуй <code>delete(0, END)</code>).</p>
+                    <div class="editor-container">
+                        <textarea id="codeLevel2" class="code-editor" spellcheck="false">from tkinter import *
+
+root = Tk()
+root.title("Мініанкета")
+
+entry_fn = Entry(root)
+entry_fn.pack()
+
+entry_ln = Entry(root)
+entry_ln.pack()
+
+def show():
+    res.config(text=entry_fn.get() + " " + entry_ln.get())
+
+def clear():
+    entry_fn.delete(0, END)
+    entry_ln.delete(0, END)
+    res.config(text="")
+
+btn_show = Button(root, text="Показати", command=show)
+btn_show.pack()
+
+btn_cls = Button(root, text="Очистити", command=clear)
+btn_cls.pack()
+
+res = Label(root, text="")
+res.pack()
+
+root.mainloop()</textarea>
+                        <div class="gui-preview">
+                            <div class="gui-window-title">Мініанкета (Simulation)</div>
+                            <div class="gui-window-body">
+                                <input type="text" id="sim2Fn" placeholder="Ім'я" style="padding:5px; margin-bottom:5px;"><br>
+                                <input type="text" id="sim2Ln" placeholder="Прізвище" style="padding:5px; margin-bottom:10px;"><br>
+                                <button class="btn btn-primary" onclick="runSim2Show()">Показати</button>
+                                <button class="btn btn-secondary" onclick="runSim2Clear()">Очистити</button>
+                                <div id="sim2Output" style="margin-top:15px; font-weight:bold; color:var(--accent);"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="verifyCode(2)">Перевірити код 🚀</button>
+                    <div id="workFeedback2" class="feedback"></div>
+                </div>
+            </section>
+
+            <!-- SECTION: QUIZ -->
+            <section id="sec-quiz" class="section">
+                <h2>📝 Перевір себе (Підсумковий тест)</h2>
+                <p>Дай відповіді на 10 запитань. Кожна правильна відповідь = 1 бал.</p>
+
+                <div id="quizContainer"></div>
+                <button class="btn btn-primary" onclick="finishQuiz()" style="margin-top: 20px;">Завершити тест та отримати результат 📊</button>
+            </section>
+
+            <!-- SECTION: REPORT -->
+            <section id="sec-report" class="section">
+                <h2>📊 Підсумковий звіт успішності</h2>
+                <div class="card report-card">
+                    <div class="report-header">
+                        <div>
+                            <h3 id="repStudentName">Учень: -</h3>
+                            <p id="repDate">Дата: -</p>
+                        </div>
+                        <div class="badge" id="repBadge">Складено</div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin: 20px 0;">
+                        <div style="width: 200px; height: 200px;">
+                            <canvas id="scoreChart"></canvas>
+                        </div>
+                        <div>
+                            <p style="font-size: 1.2rem;">Бали за тест: <strong id="repScore">0 / 10</strong></p>
+                            <p style="font-size: 1.2rem;">Відсоток успішності: <strong id="repPercent">0%</strong></p>
+                            <h4 id="repLevelText" style="color: var(--primary); margin-top: 10px;">-</h4>
+                        </div>
+                    </div>
+
+                    <div class="no-print" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="window.print()">Зберегти звіт / Друк (PDF)</button>
+                        <button class="btn btn-secondary" onclick="resetProgress()">Пройти ще раз 🔄</button>
+                        <button class="btn btn-secondary" onclick="switchSection('welcome')">На головну 🏠</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
