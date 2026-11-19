@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Текстові поля в Python (Tkinter Entry & Text) — 8 клас НУШ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-light: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            background: #0f172a;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .sidebar .nav-link {
+            color: #94a3b8;
+            padding: 0.75rem 1.25rem;
+            margin: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: white;
+            background: var(--primary-color);
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .code-editor {
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .drop-zone {
+            min-height: 50px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.5rem;
+            background: #f1f5f9;
+            transition: background 0.2s;
+        }
+
+        .drop-zone.drag-over {
+            background: #e0e7ff;
+            border-color: var(--primary-color);
+        }
+
+        .draggable-item {
+            cursor: grab;
+            user-select: none;
+        }
+        
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+
+        .badge-score {
+            font-size: 1.1rem;
+            padding: 0.5rem 1rem;
+        }
+
+        @media print {
+            .sidebar, .btn, .no-print {
+                display: none !important;
+            }
+            .main-content {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-3">
+            <div class="d-flex align-items-center mb-4 px-2">
+                <i class="bi bi-terminal-box-fill text-primary fs-3 me-2"></i>
+                <h5 class="m-0 fw-bold">Python Tkinter</h5>
+            </div>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" onclick="showModule('profile')">
+                        <i class="bi bi-person-badge"></i> Профіль та Учень
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link" onclick="showModule(1)">
+                        <i class="bi bi-1-circle"></i> Однорядкове поле Entry
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link" onclick="showModule(2)">
+                        <i class="bi bi-2-circle"></i> get(), insert(), delete()
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link" onclick="showModule(3)">
+                        <i class="bi bi-3-circle"></i> Багаторядковий Text
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link" onclick="showModule(4)">
+                        <i class="bi bi-4-circle"></i> Події та &lt;Return&gt;
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link" onclick="showModule(5)">
+                        <i class="bi bi-5-circle"></i> Конструктор (Drag&Drop)
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link" onclick="showModule(6)">
+                        <i class="bi bi-6-circle"></i> Симулятор IDE
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link" onclick="showModule('results')">
+                        <i class="bi bi-award"></i> Результати та Оцінка
+                    </a>
+                </li>
+            </ul>
+            <hr class="text-secondary">
+            <div class="px-2">
+                <small class="text-muted d-block mb-1">Поточний бал НУШ:</small>
+                <div class="badge bg-primary badge-score w-100 mb-2" id="sidebar-score">0 / 12</div>
+                <button class="btn btn-outline-danger btn-sm w-100" onclick="resetProgress()">
+                    <i class="bi bi-trash"></i> Скинути прогрес
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 main-content">
+            
+            <!-- User Profile Module -->
+            <div id="module-profile" class="module-section">
+                <div class="card p-4">
+                    <h3 class="fw-bold mb-3"><i class="bi bi-person-lines-fill text-primary"></i> Реєстрація учня 8-го класу</h3>
+                    <p class="text-muted">Заповніть ваші дані для формування підсумкового оцінювання згідно зі критеріями НУШ.</p>
+                    <form id="profile-form" onsubmit="saveProfile(event)">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Прізвище та Ім'я</label>
+                                <input type="text" class="form-control" id="student-name" required placeholder="напр., Коваленко Марія">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Клас</label>
+                                <select class="form-select" id="student-class" required>
+                                    <option value="8-А">8-А</option>
+                                    <option value="8-Б">8-Б</option>
+                                    <option value="8-В">8-В</option>
+                                    <option value="8-Г">8-Г</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Школа / Заклад</label>
+                                <input type="text" class="form-control" id="student-school" placeholder="Ліцей №1" value="ЗЗСО №1">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">
+                            <i class="bi bi-save me-1"></i> Зберегти профіль
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Module 1: Entry Basics -->
+            <div id="module-1" class="module-section d-none">
+                <div class="card p-4 mb-4">
+                    <h3 class="fw-bold text-primary mb-3">Блок 1: Створення однорядкового текстового поля (Entry)</h3>
+                    <p class="lead">Віджет <code>Entry</code> в бібліотці <code>tkinter</code> призначений для введення одного рядка тексту (наприклад: ім'я, логін, число).</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Синтаксис створення:</h5>
+                            <pre class="code-editor"><code>from tkinter import *
+
+root = Tk()
+root.title("Моя програма")
+root.geometry("300x200")
+
+# Створення поля Entry
+ent = Entry(root, width=20, fg="black", bg="white")
+ent.pack(pady=10)
+
+root.mainloop()</code></pre>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Візуальний підкажчик параметрів:</h5>
+                            <ul class="list-group mb-3">
+                                <li class="list-group-item"><code>width</code> — ширина поля в символах.</li>
+                                <li class="list-group-item"><code>fg</code> / <code>foreground</code> — колір тексту.</li>
+                                <li class="list-group-item"><code>bg</code> / <code>background</code> — колір фону.</li>
+                                <li class="list-group-item"><code>show</code> — символ для маскування (наприклад, <code>show="*"</code> для паролів).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-question-circle"></i> Завдання 1.1: Перевірка знань</h4>
+                    <p>Який параметр віджета <code>Entry</code> відповідає за приховане введення пароля (наприклад, відображення зірочок <code>*</code>)?</p>
+                    <div class="input-group mb-3" style="max-width: 400px;">
+                        <input type="text" id="q1-ans" class="form-control" placeholder="Введіть ім'я параметра...">
+                        <button class="btn btn-primary" onclick="checkQ1()">Перевірити</button>
+                    </div>
+                    <div id="q1-feedback"></div>
+                </div>
+            </div>
+
+            <!-- Module 2: Entry Operations -->
+            <div id="module-2" class="module-section d-none">
+                <div class="card p-4 mb-4">
+                    <h3 class="fw-bold text-primary mb-3">Блок 2: Методи get(), insert() та delete()</h3>
+                    <p>Для роботи з вмістом текстового поля використовуються три основні методи:</p>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Метод</th>
+                                    <th>Опис</th>
+                                    <th>Приклад використання</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>.get()</code></td>
+                                    <td>Зчитує поточний текст із поля. Повертає рядок (<code>str</code>).</td>
+                                    <td><code>text = ent.get()</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.insert(index, str)</code></td>
+                                    <td>Вставляє текст <code>str</code> у позицію <code>index</code> (наприклад, <code>0</code> або <code>END</code>).</td>
+                                    <td><code>ent.insert(0, "Привіт!")</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>.delete(first, last)</code></td>
+                                    <td>Видаляє символи з позиції <code>first</code> до <code>last</code>.</td>
+                                    <td><code>ent.delete(0, END)</code> # очистити все поле</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-play-circle text-success"></i> Завдання 2.1: Інтерактивний тренажер методів</h4>
+                    <p>Використайте кнопки для маніпуляції віртуальним полем <code>Entry</code>:</p>
+                    
+                    <div class="bg-light p-3 border rounded mb-3">
+                        <label class="form-label fw-bold">Візуальне поле Entry (tkinter):</label>
+                        <input type="text" id="demo-entry" class="form-control font-monospace fs-5" value="Добрий день">
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <button class="btn btn-outline-primary" onclick="demoInsert()">Вставити "Світ! " в початок (.insert(0, ...))</button>
+                        <button class="btn btn-outline-danger" onclick="demoClear()">Очистити все (.delete(0, END))</button>
+                        <button class="btn btn-outline-success" onclick="demoGet()">Прочитати вміст (.get())</button>
+                    </div>
+                    <div id="demo-output" class="alert alert-info d-none"></div>
+
+                    <hr>
+                    <h5>Практичне питання:</h5>
+                    <p>Яку команду потрібно виконати, щоб повністю очистити поле <code>ent</code> від першого до останнього символу?</p>
+                    <div class="input-group mb-3" style="max-width: 500px;">
+                        <input type="text" id="q2-ans" class="form-control" placeholder="напр., ent.delete(0, END)">
+                        <button class="btn btn-primary" onclick="checkQ2()">Перевірити</button>
+                    </div>
+                    <div id="q2-feedback"></div>
+                </div>
+            </div>
+
+            <!-- Module 3: Text Widget -->
+            <div id="module-3" class="module-section d-none">
+                <div class="card p-4 mb-4">
+                    <h3 class="fw-bold text-primary mb-3">Блок 3: Багаторядкове текстове поле (Text) та Scrollbar</h3>
+                    <p>Коли потрібно ввести або відобразити декілька рядків тексту, використовують віджет <code>Text</code>.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Індексація в Text:</h5>
+                            <p>В віджеті <code>Text</code> індекси записуються у форматі <code>"рядок.стовпець"</code> (наприклад, <code>"1.0"</code> — перший рядок, перший символ).</p>
+                            <pre class="code-editor"><code>from tkinter import *
+
+root = Tk()
+txt = Text(root, width=40, height=10, wrap=WORD)
+txt.pack(side=LEFT, fill=BOTH)
+
+# Додавання прокручування (Scrollbar)
+scroll = Scrollbar(root, command=txt.yview)
+scroll.pack(side=RIGHT, fill=Y)
+txt.config(yscrollcommand=scroll.set)
+
+txt.insert("1.0", "Перший рядок\nДругий рядок")
+root.mainloop()</code></pre>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Режими переносу тексту (wrap):</h5>
+                            <ul class="list-group mb-3">
+                                <li class="list-group-item"><code>wrap=WORD</code> — перенос по цілих словах.</li>
+                                <li class="list-group-item"><code>wrap=CHAR</code> — перенос по окремих символах.</li>
+                                <li class="list-group-item"><code>wrap=NONE</code> — без переносу (з'являється горизонтальна смуга).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-check2-square"></i> Завдання 3.1: Перевірка розуміння індексації</h4>
+                    <p>Як правильно записати індекс для позначення <strong>початку першого рядка</strong> у віджеті <code>Text</code>?</p>
+                    <div class="input-group mb-3" style="max-width: 400px;">
+                        <input type="text" id="q3-ans" class="form-control" placeholder='напр., "1.0"'>
+                        <button class="btn btn-primary" onclick="checkQ3()">Перевірити</button>
+                    </div>
+                    <div id="q3-feedback"></div>
+                </div>
+            </div>
+
+            <!-- Module 4: Event Handling & Return -->
+            <div id="module-4" class="module-section d-none">
+                <div class="card p-4 mb-4">
+                    <h3 class="fw-bold text-primary mb-3">Блок 4: Обробка подій та клавіша &lt;Return&gt;</h3>
+                    <p>Щоб програма реагувала на натискання клавіші <strong>Enter</strong> у полі <code>Entry</code>, використовують метод <code>.bind()</code>.</p>
+                    <pre class="code-editor"><code>def process_enter(event):
+    user_text = ent.get()
+    label.config(text=f"Ви ввели: {user_text}")
+
+ent = Entry(root)
+# Прив'язка події натискання клавіші Enter
+ent.bind("<Return>", process_enter)
+ent.pack()</code></pre>
+                </div>
+
+                <div class="card p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-lightning-charge text-warning"></i> Завдання 4.1: Інтерактивний тест на обробку подій</h4>
+                    <p>Виберіть правильне твердження щодо функції-обробника (event handler), яка прив'язується через <code>.bind()</code>:</p>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="q4-option" id="q4-opt1" value="1">
+                        <label class="form-check-label" for="q4-opt1">
+                            Функція-обробник не повинна приймати жодних аргументів.
+                        </label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="q4-option" id="q4-opt2" value="2">
+                        <label class="form-check-label" for="q4-opt2">
+                            Функція-обробник обов'язково повинна приймати один параметр (наприклад, <code>event</code>).
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="q4-option" id="q4-opt3" value="3">
+                        <label class="form-check-label" for="q4-opt3">
+                            Подія <code>&lt;Return&gt;</code> працює тільки для віджета <code>Button</code>.
+                        </label>
+                    </div>
+                    <button class="btn btn-primary" onclick="checkQ4()">Відповісти</button>
+                    <div id="q4-feedback" class="mt-3"></div>
+                </div>
+            </div>
+
+            <!-- Module 5: Drag & Drop Puzzle -->
+            <div id="module-5" class="module-section d-none">
+                <div class="card p-4 mb-4">
+                    <h3 class="fw-bold text-primary mb-3">Блок 5: Конструктор коду (Drag & Drop)</h3>
+                    <p>Перетягніть блоки коду у правильному порядку, щоб утворити робочу програму, яка зчитує текст із <code>Entry</code> та виводить його в консоль при натисканні кнопки.</p>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <h5 class="mb-3">Блоки коду (Перетягуйте звідси):</h5>
+                            <div id="drag-source" class="d-flex flex-column gap-2 p-3 bg-light border rounded">
+                                <div class="draggable-item btn btn-outline-dark text-start" draggable="true" id="block-3">root.mainloop()</div>
+                                <div class="draggable-item btn btn-outline-dark text-start" draggable="true" id="block-1">from tkinter import *</div>
+                                <div class="draggable-item btn btn-outline-dark text-start" draggable="true" id="block-2">ent = Entry(root); ent.pack()</div>
+                                <div class="draggable-item btn btn-outline-dark text-start" draggable="true" id="block-0">root = Tk()</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-7">
+                            <h5 class="mb-3">Порядок виконання програми:</h5>
+                            <div id="drop-target" class="d-flex flex-column gap-2 p-3 bg-white border rounded drop-zone" style="min-height: 250px;">
+                            </div>
+                            <button class="btn btn-success mt-3 w-100" onclick="checkDragDrop()">
+                                <i class="bi bi-check-circle me-1"></i> Перевірити збірку коду
+                            </button>
+                            <div id="q5-feedback" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 6: Code Simulator & File Editor -->
+            <div id="module-6" class="module-section d-none">
+                <div class="card p-4 mb-4">
+                    <h3 class="fw-bold text-primary mb-3">Блок 6: Практичний симулятор Python IDE</h3>
+                    <p>Напишіть або відредагуйте код нижче, щоб створити віджет <code>Entry</code> або <code>Text</code> і запустить його для віртуального виконання.</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ваш код Python (Tkinter):</label>
+                        <textarea id="python-code-input" class="form-control font-monospace code-editor" rows="8">from tkinter import *
+
+root = Tk()
+root.title("Тест Entry")
+
+ent = Entry(root, width=25)
+ent.pack(pady=10)
+
+def show_text():
+    print("Введено:", ent.get())
+
+btn = Button(root, text="Зчитати", command=show_text)
+btn.pack()
+
+root.mainloop()</textarea>
+                    </div>
+
+                    <button class="btn btn-primary mb-3" onclick="runPythonSimulator()">
+                        <i class="bi bi-play-fill"></i> Запустити код у симуляторі
+                    </button>
+
+                    <div class="card bg-light p-3">
+                        <h5 class="fw-bold"><i class="bi bi-display"></i> Віртуальне вікно Tkinter (Результат):</h5>
+                        <div id="virtual-window" class="border bg-white p-3 rounded text-center" style="min-height: 150px;">
+                            <em class="text-muted">Натисніть "Запустити код", щоб згенерувати інтерфейс.</em>
+                        </div>
+                        <hr>
+                        <h6>Консоль виводу (print):</h6>
+                        <pre id="virtual-console" class="bg-dark text-success p-2 rounded" style="min-height: 50px;">&gt; Готовий до запуску...</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results & Evaluation Module -->
+            <div id="module-results" class="module-section d-none">
+                <div id="printable-area">
+                    <div class="card p-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="fw-bold text-primary m-0"><i class="bi bi-award-fill"></i> Підсумкова Картка Оцінювання НУШ</h3>
+                            <span class="badge bg-success fs-5" id="final-badge-score">0 / 12 балів</span>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Учень/Учениця:</strong> <span id="res-name">—</span></p>
+                                <p class="mb-1"><strong>Клас:</strong> <span id="res-class">—</span></p>
+                                <p class="mb-1"><strong>Навчальний заклад:</strong> <span id="res-school">—</span></p>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <p class="mb-1"><strong>Тема:</strong> Текстові поля в Python (Tkinter)</p>
+                                <p class="mb-1"><strong>Дата виконання:</strong> <span id="res-date">--.--.----</span></p>
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold mb-3">Деталізація успішності за блоками:</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Блок / Завдання</th>
+                                        <th>Макс. бал</th>
+                                        <th>Отримано балів</th>
+                                        <th>Статус</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="results-table-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 no-print">
+                    <button class="btn btn-primary" onclick="exportToPDF()">
+                        <i class="bi bi-file-earmark-pdf"></i> Експорт в PDF
+                    </button>
+                    <button class="btn btn-success" onclick="exportToJSON()">
+                        <i class="bi bi-download"></i> Завантажити JSON
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.print()">
+                        <i class="bi bi-printer"></i> Друк картки
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<script>
+    // Global Application State
+    let state = {
+        student: { name: '', class: '8-А', school: 'ЗЗСО №1' },
+        scores: {
+            task1: 0,
+            task2: 0,
+            task3: 0,
+            task4: 0,
+            task5: 0,
+            task6: 0
+        },
+        date: new Date().toLocaleDateString('uk-UA')
+    };
+
+    // Load State from LocalStorage
+    function loadState() {
+        const saved = localStorage.getItem('nush_python_entry_state');
+        if (saved) {
+            try {
+                state = JSON.parse(saved);
+                document.getElementById('student-name').value = state.student.name || '';
+                document.getElementById('student-class').value = state.student.class || '8-А';
+                document.getElementById('student-school').value = state.student.school || '';
+            } catch (e) {
+                console.error("Error loading saved state", e);
+            }
+        }
+        updateScoreUI();
+    }
+
+    // Save State to LocalStorage
+    function saveState() {
+        localStorage.setItem('nush_python_entry_state', JSON.stringify(state));
+        updateScoreUI();
+    }
+
+    function resetProgress() {
+        if (confirm("Ви впевнені, що бажаєте скинути весь прогрес?")) {
+            localStorage.removeItem('nush_python_entry_state');
+            location.reload();
+        }
+    }
+
+    function updateScoreUI() {
+        const totalScore = Object.values(state.scores).reduce((a, b) => a + b, 0);
+        // Scaled to 12-point NUSH scale (6 tasks * 2 points each = 12 points total)
+        document.getElementById('sidebar-score').innerText = `${totalScore} / 12 балів`;
+        document.getElementById('final-badge-score').innerText = `${totalScore} / 12 балів`;
+
+        // Update Results Table
+        document.getElementById('res-name').innerText = state.student.name || 'Не вказано';
+        document.getElementById('res-class').innerText = state.student.class || '8-А';
+        document.getElementById('res-school').innerText = state.student.school || 'ЗЗСО №1';
+        document.getElementById('res-date').innerText = state.date;
+
+        const tasksInfo = [
+            { name: 'Блок 1: Параметри Entry', key: 'task1', max: 2 },
+            { name: 'Блок 2: Методи get/insert/delete', key: 'task2', max: 2 },
+            { name: 'Блок 3: Індексація Text', key: 'task3', max: 2 },
+            { name: 'Блок 4: Обробка події <Return>', key: 'task4', max: 2 },
+            { name: 'Блок 5: Drag & Drop Конструктор', key: 'task5', max: 2 },
+            { name: 'Блок 6: IDE Симулятор', key: 'task6', max: 2 }
+        ];
+
+        const tbody = document.getElementById('results-table-body');
+        tbody.innerHTML = '';
+        tasksInfo.forEach(t => {
+            const score = state.scores[t.key];
+            const isDone = score > 0;
+            tbody.innerHTML += `
+                <tr>
+                    <td>${t.name}</td>
+                    <td>${t.max}</td>
+                    <td>${score}</td>
+                    <td><span class="badge bg-${isDone ? 'success' : 'secondary'}">${isDone ? 'Виконано' : 'Не виконано'}</span></td>
+                </tr>
+            `;
+        });
+    }
+
+    // Navigation Handler
+    function showModule(mod) {
+        document.querySelectorAll('.module-section').forEach(el => el.classList.add('d-none'));
+        document.querySelectorAll('.sidebar .nav-link').forEach(el => el.classList.remove('active'));
+
+        const target = document.getElementById(`module-${mod}`);
+        if (target) target.classList.remove('d-none');
+
+        // Highlight nav item
+        const activeNav = Array.from(document.querySelectorAll('.sidebar .nav-link')).find(el => 
+            el.getAttribute('onclick') && el.getAttribute('onclick').includes(`'${mod}'`) || el.getAttribute('onclick').includes(`(${mod})`)
+        );
+        if (activeNav) activeNav.classList.add('active');
+    }
+
+    // Profile Form Handler
+    function saveProfile(e) {
+        e.preventDefault();
+        state.student.name = document.getElementById('student-name').value;
+        state.student.class = document.getElementById('student-class').value;
+        state.student.school = document.getElementById('student-school').value;
+        saveState();
+        alert('Профіль успішно збережено!');
+    }
+
+    // Task 1 Checker
+    function checkQ1() {
+        const val = document.getElementById('q1-ans').value.trim().toLowerCase();
+        const fb = document.getElementById('q1-feedback');
+        if (val === 'show' || val === 'show="*"') {
+            fb.innerHTML = `<div class="alert alert-success">Правильно! Параметр <code>show</code> використовується для приховування символів.</div>`;
+            state.scores.task1 = 2;
+        } else {
+            fb.innerHTML = `<div class="alert alert-danger">Неправильно. Згадайте параметр: <code>show="*"</code>.</div>`;
+            state.scores.task1 = 0;
+        }
+        saveState();
+    }
+
+    // Task 2 Interactive Demo & Checker
+    function demoInsert() {
+        const input = document.getElementById('demo-entry');
+        input.value = "Світ! " + input.value;
+    }
+    function demoClear() {
+        const input = document.getElementById('demo-entry');
+        input.value = "";
+    }
+    function demoGet() {
+        const input = document.getElementById('demo-entry');
+        const out = document.getElementById('demo-output');
+        out.classList.remove('d-none');
+        out.innerText = `Метод .get() повернув значення: "${input.value}"`;
+    }
+
+    function checkQ2() {
+        const val = document.getElementById('q2-ans').value.trim().replace(/\s+/g, '');
+        const fb = document.getElementById('q2-feedback');
+        if (val.includes('ent.delete(0,END)') || val.includes('delete(0,END)')) {
+            fb.innerHTML = `<div class="alert alert-success">Чудово! Команда <code>ent.delete(0, END)</code> очищає поле повністю.</div>`;
+            state.scores.task2 = 2;
+        } else {
+            fb.innerHTML = `<div class="alert alert-danger">Незовсім так. Використайте індекси <code>0</code> та <code>END</code>.</div>`;
+            state.scores.task2 = 0;
+        }
+        saveState();
+    }
+
+    // Task 3 Checker
+    function checkQ3() {
+        const val = document.getElementById('q3-ans').value.trim().replace(/"/g, '').replace(/'/g, '');
+        const fb = document.getElementById('q3-feedback');
+        if (val === '1.0') {
+            fb.innerHTML = `<div class="alert alert-success">Правильно! Індекс <code>"1.0"</code> позначає 1-й рядок та 0-ю позицію символу.</div>`;
+            state.scores.task3 = 2;
+        } else {
+            fb.innerHTML = `<div class="alert alert-danger">Неправильно. Формат індексування у Text: <code>"рядок.стовпець"</code>, тобто <code>"1.0"</code>.</div>`;
+            state.scores.task3 = 0;
+        }
+        saveState();
+    }
+
+    // Task 4 Checker
+    function checkQ4() {
+        const selected = document.querySelector('input[name="q4-option"]:checked');
+        const fb = document.getElementById('q4-feedback');
+        if (selected && selected.value === '2') {
+            fb.innerHTML = `<div class="alert alert-success">Вірно! Зв'язана через bind функція завжди приймає об'єкт події <code>event</code>.</div>`;
+            state.scores.task4 = 2;
+        } else {
+            fb.innerHTML = `<div class="alert alert-danger">Невірно. При події bind Python передає об'єкт події <code>event</code> у функцію.</div>`;
+            state.scores.task4 = 0;
+        }
+        saveState();
+    }
+
+    // Task 5: Drag and Drop Logic
+    function initDragAndDrop() {
+        const draggables = document.querySelectorAll('.draggable-item');
+        const dropZone = document.getElementById('drop-target');
+        const sourceZone = document.getElementById('drag-source');
+
+        draggables.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', item.id);
+            });
+        });
+
+        [dropZone, sourceZone].forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('drag-over');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('drag-over');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                const id = e.dataTransfer.getData('text/plain');
+                const draggedElement = document.getElementById(id);
+                if (draggedElement) {
+                    zone.appendChild(draggedElement);
+                }
+            });
+        });
+    }
+
+    function checkDragDrop() {
+        const dropZone = document.getElementById('drop-target');
+        const items = Array.from(dropZone.children).map(el => el.id);
+        const correctOrder = ['block-1', 'block-0', 'block-2', 'block-3'];
+
+        const fb = document.getElementById('q5-feedback');
+        if (JSON.stringify(items) === JSON.stringify(correctOrder)) {
+            fb.innerHTML = `<div class="alert alert-success">Вітаємо! Послідовність коду складена абсолютно вірно!</div>`;
+            state.scores.task5 = 2;
+        } else {
+            fb.innerHTML = `<div class="alert alert-danger">Порядок невірний. Згадайте: Спочатку імпорт, створення вікна, додавання віджетів, і в кінці mainloop().</div>`;
+            state.scores.task5 = 0;
+        }
+        saveState();
+    }
+
+    // Task 6: Python IDE Simulator
+    function runPythonSimulator() {
+        const code = document.getElementById('python-code-input').value;
+        const win = document.getElementById('virtual-window');
+        const consoleOut = document.getElementById('virtual-console');
+
+        win.innerHTML = '';
+        consoleOut.innerText = '> Код виконано успішно.
+';
+
+        // Dynamic Mock UI Render based on input code
+        let hasEntry = code.includes('Entry');
+        let hasButton = code.includes('Button');
+
+        let htmlContainer = document.createElement('div');
+        htmlContainer.className = 'd-flex flex-column align-items-center gap-2 my-2';
+
+        let inputEl = null;
+
+        if (hasEntry) {
+            inputEl = document.createElement('input');
+            inputEl.type = 'text';
+            inputEl.className = 'form-control w-50';
+            inputEl.placeholder = 'Tkinter Entry...';
+            htmlContainer.appendChild(inputEl);
+        }
+
+        if (hasButton) {
+            let btnEl = document.createElement('button');
+            btnEl.className = 'btn btn-primary btn-sm';
+            btnEl.innerText = 'Зчитати';
+            btnEl.onclick = () => {
+                const textVal = inputEl ? inputEl.value : '';
+                consoleOut.innerText += `
+Введено: ${textVal}`;
+            };
+            htmlContainer.appendChild(btnEl);
+        }
+
+        win.appendChild(htmlContainer);
+        state.scores.task6 = 2;
+        saveState();
+    }
+
+    // Export Utilities
+    function exportToJSON() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+        const dlAnchorElem = document.createElement('a');
+        dlAnchorElem.setAttribute("href", dataStr);
+        dlAnchorElem.setAttribute("download", `nush_python_entry_${state.student.name || 'student'}.json`);
+        dlAnchorElem.click();
+    }
+
+    function exportToPDF() {
+        const element = document.getElementById('printable-area');
+        const opt = {
+            margin:       0.5,
+            filename:     `nush_results_${state.student.name || 'student'}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // Initialize Page
+    document.addEventListener('DOMContentLoaded', () => {
+        loadState();
+        initDragAndDrop();
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
